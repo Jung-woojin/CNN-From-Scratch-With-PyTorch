@@ -1,4 +1,4 @@
 # CNN-From-Scratch-With-PyTorch
 ## PyTorch로 CNN 직접 구현
 
-Pytoch를 사용하여 CNN 모델 구조 직접 설계 및 커스터마이징
+PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징까지 연습하는 저장소
