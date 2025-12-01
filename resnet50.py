@@ -84,7 +84,7 @@ class identity_block(torch.nn.Module):
         return out
     
 class ResNet50(torch.nn.Module):
-    def __init__(self, num_classes=1000):
+    def __init__(self, num_classes=10):
         super(ResNet50, self).__init__()
         self.stem = stem(3, 64)
         
@@ -128,3 +128,20 @@ class ResNet50(torch.nn.Module):
         x = self.fc(x)
         return x
         
+if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = ResNet50(num_classes=10).to(device)
+    print(model)
+    
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total params: {total_params:,}  Trainable: {trainable:,}")
+    
+    try:
+        from torchinfo import summary
+        summary(model, input_size=(1, 3, 224, 224), device=str(device))
+    except Exception as e:
+        print("torchinfo not available:", e)
+        x = torch.randn(1, 3, 224, 224).to(device)
+        y = model(x)
+        print("Output shape:", y.shape)
