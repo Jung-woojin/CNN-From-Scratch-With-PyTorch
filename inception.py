@@ -1,4 +1,6 @@
 import torch
+import torchinfo
+
 class convblcok(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, activation=True):
         super(convblcok, self).__init__()
@@ -95,7 +97,7 @@ class Custom_Inception_Net(torch.nn.Module):
         self.head = torch.nn.Sequential(
             torch.nn.AdaptiveAvgPool2d(1),
             torch.nn.Flatten(),
-            torch.Linear(512, num_classes)
+            torch.nn.Linear(512, num_classes)
         )
         
     def forward(self, x):
@@ -107,3 +109,22 @@ class Custom_Inception_Net(torch.nn.Module):
         x = self.stage3(x)
         x = self.head(x)
         return(x)
+    
+
+if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = Custom_Inception_Net(num_classes=10).to(device)
+    print(model)
+    
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total params: {total_params:,}  Trainable: {trainable:,}")
+    
+    try:
+        from torchinfo import summary
+        summary(model, input_size=(1, 3, 224, 224), device=str(device))
+    except Exception as e:
+        print("torchinfo not available:", e)
+        x = torch.randn(1, 3, 224, 224).to(device)
+        y = model(x)
+        print("Output shape:", y.shape)
