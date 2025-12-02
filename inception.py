@@ -108,7 +108,7 @@ class Custom_Inception_Net(torch.nn.Module):
         x = self.reduction2(x)
         x = self.stage3(x)
         x = self.head(x)
-        return(x)
+        return x
     
 
 if __name__ == "__main__":
