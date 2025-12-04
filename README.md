@@ -10,9 +10,9 @@ PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징
 ## What I did
 1. AlexNet 
 2. VGG19
-3. Resnet50 (Residual)
-4. Inception (Multi Branch Like CSP)
-5. Mobilenetv2 (Depthwise Conv & Expansion)
+3. Resnet50 - Bottleneck Blocks, Skip Connections
+4. Inception - Multi Branch, Concat
+5. Mobilenetv2 Depthwise Separable Conv, Inverted (Residual) Bottlenecks
 
 
 
