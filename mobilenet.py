@@ -86,9 +86,9 @@ class Custom_MobileNet_V2(torch.nn.Module):
         )
         
         self.layer7 = torch.nn.Sequential(
-            DWSConv(160,320,3, expansion=4),
-            DWSConv(320,320,3, expansion=4),
-            DWSConv(320,320,3, expansion=4),
+            DWSConv(160,320, 3, expansion=4),
+            DWSConv(320,320, 3, expansion=4),
+            DWSConv(320,320, 3, expansion=4),
         )
         
         self.head = torch.nn.Sequential(
