@@ -15,6 +15,7 @@ PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징
 5. Mobilenetv2 Depthwise Separable Conv, Inverted (Residual) Bottlenecks
 6. Xception - Multi Branchs, Bottlenecks, Depthwise Sepable Conv
 7. ResNext - Group Conv, Projection, Residual
+8. RepVGG - Reparameterization
 
 
 
@@ -24,3 +25,4 @@ PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징
 2. 훈련 결과 확인 및 분석을 위한 코드 학습 필요
 3. 모델 구조 구현 코드 공부(자속)
 4. 반복 횟수, 스트라이드 별 프로젝션을 하나의 구조 안에서 사용할 수 있도록 인자 사용 능력 키우기
+5. Reparameterization 익히기
