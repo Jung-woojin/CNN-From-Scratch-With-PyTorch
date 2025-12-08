@@ -3,10 +3,6 @@
 
 PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징까지 연습하는 저장소
 
-1. Resnet50 구현
-2. Inception 모듈 구현(Residual을 사용하는 v4 구조)
-
-
 ## What I did
 1. AlexNet 
 2. VGG19
@@ -15,7 +11,7 @@ PyTorch로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징
 5. Mobilenetv2 Depthwise Separable Conv, Inverted (Residual) Bottlenecks
 6. Xception - Multi Branchs, Bottlenecks, Depthwise Sepable Conv
 7. ResNext - Group Conv, Projection, Residual
-8. RepVGG - Reparameterization
+8. RepVGG - Reparameterization  
 
 
 
