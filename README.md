@@ -1,287 +1,415 @@
-# CNN-From-Scratch-With-PyTorch
-## PyTorch 로 CNN 직접 구현
+# CNN 백본 네트워크 직접 구현 연습 🧠🏗️
 
-**작업자**: Jung-woojin (wojin010629@gmail.com)
+**PyTorch 로 14 개 CNN 아키텍처 직접 구현하며 백본 네트워크 이해를 극대화합니다.**
 
-**최종 수정일**: 2026-04-03
+**작업자**: Jung-woojin  
+**이메일**: wojin010629@gmail.com  
+**최종 업데이트**: 2026-04-03
 
-PyTorch 로 CNN 아키텍처를 직접 설계·재구현하며 커스터마이징까지 연습하는 저장소
+---
 
-## What I did
-1. **AlexNet** - First deep CNN with ReLU, Dropout
-2. **VGG19** - Thin 3x3 convolutions, 19 layers
-3. **ResNet50** - Bottleneck Blocks, Skip Connections, Residual Learning
-4. **Inception (v1)** - Multi-Branch, Concat, GoogLeNet architecture
-5. **MobileNetV2** - Depthwise Separable Conv, Inverted (Residual) Bottlenecks
-6. **Xception** - Depthwise Separable Conv, Multi-Branch, Bottlenecks
-7. **ResNeXt** - Group Convolution, Projection, Residual Learning
-8. **RepVGG** - Reparameterization, Train/Inference structure separation
-9. **GoogLeNet** - Multi-Branch, 1x1 dimensionality reduction, Auxiliary classifiers
-10. **EfficientNet (B0)** - Compound Scaling, MBConv, SE blocks, SOTA accuracy
-11. **SqueezeNet 1.0** - Fire Module, AlexNet-level accuracy with 50x fewer parameters
-12. **DenseNet-121** - Dense Connection, Every layer connected to all subsequent layers
-13. **NASNet-A Mobile** - Neural Architecture Search, Reusable building blocks
-14. **MobileNetV3 Large** - h-swish activation, SE blocks, Mobile optimized
+## 🎯 이 레포지토리의 목적
 
-## To Do List
-1. ✅ Inception v1 구현 완료
-2. ✅ Compound Scaling 구현 완료 (EfficientNet)
-3. ✅ 초경량 CNN 구현 완료 (SqueezeNet)
-4. ✅ Dense Connection 구현 완료 (DenseNet)
-5. ✅ NAS 구현 완료 (NASNet)
-6. ✅ Mobile 최적화 구현 완료 (MobileNetV3)
-7. 데이터 로더와 훈련 파라미터 설정하는 코드에 대한 학습 필요
-8. 훈련 결과 확인 및 분석을 위한 코드 학습 필요
-9. 모델 구조 구현 코드 공부 (자속)
-10. 반복 횟수, 스트라이드 별 프로젝션을 하나의 구조 안에서 사용할 수 있도록 인자 사용 능력 키우기
+**CNN 백본 네트워크 (Backbone Network) 를 직접 구현하며 학습합니다.**
 
-## CNN 아키텍처 비교
+- 각 아키텍처의 핵심 아이디어를 코드로 구현
+- PyTorch 의 기본적인 `nn.Module`, `nn.Conv2d`, `nn.BatchNorm2d` 등을 활용
+- 복잡한 모듈 (ResBlock, Inception, MBConv 등) 을 직접 설계
+- 아키텍처 설계의 의도와 세부 사항을 깊이 있게 이해
 
-| 아키텍처 | 연도 | 주요 특징 | 파라미터 |
-|----------|------|-----------|----------|
-| AlexNet | 2012 | ReLU, Dropout, Overlapping Pooling | ~60M |
-| VGG19 | 2014 | 얇은 3x3 컨볼루션 | ~143M |
-| ResNet50 | 2015 | Bottleneck, Skip Connections | ~25.6M |
-| Inception | 2014 | Multi-Branch, 1x1 conv | ~5.8M |
-| MobileNetV2 | 2018 | Depthwise Separable, Inverted Residual | ~3.5M |
-| Xception | 2017 | Depthwise Separable, Extends Inception | ~23M |
-| ResNeXt | 2016 | Group Convolution, Cardinality | ~30M |
-| RepVGG | 2021 | Reparameterization, Training-time structure | ~21M |
-| GoogLeNet | 2014 | Auxiliary Classifiers, Multi-Scale | ~5.8M |
-| EfficientNet | 2019 | Compound Scaling, MBConv | ~5.3M |
-| SqueezeNet | 2016 | Fire Module, 1x1 dominant | ~1.2M |
-| DenseNet | 2017 | Dense Connection, Feature Reuse | ~8M |
-| NASNet | 2018 | Neural Architecture Search | ~5.4M |
-| MobileNetV3 | 2019 | h-swish, SE blocks | ~5.4M |
+> **핵심**: 이론을 공부하는 것을 넘어, 직접 코딩하며 완전히 이해합니다.
 
-## 핵심 기술
+---
 
-### MBConv (Mobile Inverted Bottleneck Convolution)
-- **Expansion**: 1x1 Conv for channel expansion
-- **Depthwise**: 3x3 Depthwise convolution for spatial filtering
-- **Projection**: 1x1 Conv for channel reduction
-- **SE (Squeeze-and-Excitation)**: Channel-wise attention mechanism
+## 📋 구현 완료된 아키텍처
 
-### SqueezeNet (Fire Module)
-- **Squeeze**: 1x1 conv to reduce channels
-- **Expand**: Parallel 1x1 and 3x3 convolutions
-- **Concat**: Combine results
-- **Result**: AlexNet accuracy with 50x fewer parameters
+### 1️⃣ 기본 아키텍처
 
-### DenseNet (Dense Connection)
-- **Feature Reuse**: Each layer receives feature maps from all previous layers
-- **Gradient Flow**: Direct gradient paths to all layers
-- **Efficiency**: Fewer parameters than ResNet
-- **Structure**: Dense blocks → Transition layers → Dense blocks
+| # | 아키텍처 | 연도 | 특징 | 레이어 수 | 파라미터 |
+|---|----------|------|------|---------|----------|
+| 1 | **AlexNet** | 2012 | ReLU, Dropout, Overlapping Pool | 8 | ~60M |
+| 2 | **VGG19** | 2014 | Thin 3×3 convolutions, 19 layers | 19 | ~143M |
+| 3 | **GoogLeNet** | 2014 | Inception Module, Aux Classifiers | 22 | ~5.8M |
 
-### Compound Scaling (EfficientNet)
-- **Balance**: Simultaneously scale width, depth, resolution
-- **Parameters**: α (width), β (depth), δ (resolution), γ (depth)
-- **Efficient**: Better accuracy with fewer parameters
+### 2️⃣ Residual 기반
 
-## GitHub Links
-- **Repository**: https://github.com/Jung-woojin/CNN-From-Scratch-With-PyTorch
-- **Main Branch**: main
-- **License**: MIT (implied)
+| # | 아키텍처 | 연도 | 특징 | 레이어 수 | 파라미터 |
+|---|----------|------|------|---------|----------|
+| 4 | **ResNet50** | 2016 | Bottleneck Block, Skip Connection | 50 | ~25.6M |
+| 5 | **ResNeXt** | 2017 | Group Convolution, Cardinality | - | ~30M |
 
-## 🧪 모델 테스트 및 비교 (model_test.py)
+### 3️⃣ 효율성 최적화
 
-파편화된 개별 파일들을 통합한 테스트 프레임워크를 제공합니다.
+| # | 아키텍처 | 연도 | 특징 | 레이어 수 | 파라미터 |
+|---|----------|------|------|---------|----------|
+| 6 | **MobileNetV2** | 2018 | Inverted Residual, Depthwise Separable | - | ~3.5M |
+| 7 | **Xception** | 2017 | Depthwise Separable, Extends Inception | - | ~23M |
+| 8 | **MobileNetV3** | 2019 | h-swish, SE blocks, MobileOptimized | - | ~5.4M |
 
-### 설치 의존성
+### 4️⃣ 혁신적 설계
 
-```bash
-pip install torch torchvision pillow
+| # | 아키텍처 | 연도 | 특징 | 레이어 수 | 파라미터 |
+|---|----------|------|------|---------|----------|
+| 9 | **Inception v1** | 2014 | Multi-Branch, 1×1 dimension reduction | - | ~5.8M |
+| 10 | **RepVGG** | 2021 | Reparameterization, Train/Inference | - | ~21M |
+| 11 | **EfficientNet-B0** | 2019 | Compound Scaling, MBConv, SE blocks | 100+ | ~5.3M |
+| 12 | **SqueezeNet 1.0** | 2016 | Fire Module, 1×1 dominant | - | ~1.2M |
+
+### 5️⃣ 최첨단
+
+| # | 아키텍처 | 연도 | 특징 | 레이어 수 | 파라미터 |
+|---|----------|------|------|---------|----------|
+| 13 | **DenseNet-121** | 2017 | Dense Connection, Feature Reuse | 121 | ~8M |
+| 14 | **NASNet-A Mobile** | 2018 | Neural Architecture Search | - | ~5.4M |
+
+---
+
+## 🔥 핵심 기술 구현
+
+### ResNet Bottleneck Block
+
+```python
+class Bottleneck(nn.Module):
+    expansion = 4
+    
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        super().__init__()
+        self.conv1 = nn.Conv2d(inplanes, planes, 1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, 3, stride, 1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.conv3 = nn.Conv2d(planes, planes * self.expansion, 1, bias=False)
+        self.bn3 = nn.BatchNorm2d(planes * self.expansion)
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+        self.stride = stride
+    
+    def forward(self, x):
+        identity = x
+        
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
+        
+        out = self.conv3(out)
+        out = self.bn3(out)
+        
+        if self.downsample is not None:
+            identity = self.downsample(x)
+        
+        out += identity
+        out = self.relu(out)
+        
+        return out
 ```
 
-### 주요 기능
+### Inception Module
 
-1. **단일 모델 테스트**: 특정 아키텍처에 이미지 분류 실행
-2. **모델 비교**: 모든 아키텍처의 정확도 및 추론 시간 비교
-3. **벤치마킹**: 모델별 파라미터 수, 추론 시간, 처리량 분석
+```python
+class InceptionModule(nn.Module):
+    def __init__(self, in_channels, out_1x1, 
+                 out_3x3_reduce, out_3x3,
+                 out_5x5_reduce, out_5x5,
+                 out_pool_proj):
+        super().__init__()
+        
+        # 1x1 path
+        self.path1 = nn.Sequential(
+            nn.Conv2d(in_channels, out_1x1, 1),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 3x3 path (1x1 reduction → 3x3)
+        self.path2 = nn.Sequential(
+            nn.Conv2d(in_channels, out_3x3_reduce, 1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_3x3_reduce, out_3x3, 3, padding=1),
+            nn.ReLU(inplace=True)
+        )
+        
+        # 5x5 path (1x1 reduction → 5x5)
+        self.path3 = nn.Sequential(
+            nn.Conv2d(in_channels, out_5x5_reduce, 1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_5x5_reduce, out_5x5, 5, padding=2),
+            nn.ReLU(inplace=True)
+        )
+        
+        # pooling path (1x1 projection)
+        self.path4 = nn.Sequential(
+            nn.MaxPool2d(3, stride=1, padding=1),
+            nn.Conv2d(in_channels, out_pool_proj, 1),
+            nn.ReLU(inplace=True)
+        )
+    
+    def forward(self, x):
+        return torch.cat([self.path1(x), self.path2(x), 
+                         self.path3(x), self.path4(x)], dim=1)
+```
 
-### 사용 방법
+### MBConv (MobileNetV2/V3, EfficientNet)
 
-#### 🔍 단일 모델 테스트
+```python
+class MBConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, expand_ratio,
+                 stride, kernel_size=3, se_ratio=None):
+        super().__init__()
+        
+        hidden_dim = in_channels * expand_ratio
+        use_se = se_ratio and se_ratio > 0
+        
+        # Expansion: 1×1 Conv
+        self.expand_conv = nn.Conv2d(in_channels, hidden_dim, 1)
+        self.expand_bn = nn.BatchNorm2d(hidden_dim)
+        
+        # Depthwise Convolution
+        self.depthwise = nn.Conv2d(hidden_dim, hidden_dim, kernel_size, 
+                                   stride=stride, padding=kernel_size//2,
+                                   groups=hidden_dim)
+        self.depthwise_bn = nn.BatchNorm2d(hidden_dim)
+        
+        # Squeeze-and-Excitation
+        if use_se:
+            self.se = SELayer(hidden_dim, se_ratio)
+        else:
+            self.se = nn.Identity()
+        
+        # Projection: 1×1 Conv
+        self.project = nn.Conv2d(hidden_dim, out_channels, 1)
+        self.project_bn = nn.BatchNorm2d(out_channels)
+        
+        self.relu = nn.ReLU(inplace=True)
+        
+        self.use_residual = stride == 1 and in_channels == out_channels
+    
+    def forward(self, x):
+        residual = x
+        
+        # Expansion
+        x = self.expand_conv(x)
+        x = self.expand_bn(x)
+        x = self.relu(x)
+        
+        # Depthwise
+        x = self.depthwise(x)
+        x = self.depthwise_bn(x)
+        x = self.relu(x)
+        
+        # SE
+        x = self.se(x)
+        
+        # Projection
+        x = self.project(x)
+        x = self.project_bn(x)
+        
+        # Residual connection
+        if self.use_residual:
+            x = x + residual
+        
+        return x
+```
+
+### SqueezeNet - Fire Module
+
+```python
+class FireModule(nn.Module):
+    def __init__(self, in_channels, squeeze_channels, expand_channels):
+        super().__init__()
+        
+        self.squeeze = nn.Conv2d(in_channels, squeeze_channels, 1)
+        self.squeeze_relu = nn.ReLU(inplace=True)
+        
+        self.expand_1x1 = nn.Conv2d(squeeze_channels, expand_channels, 1)
+        self.expand_1x1_relu = nn.ReLU(inplace=True)
+        
+        self.expand_3x3 = nn.Conv2d(squeeze_channels, expand_channels, 3, padding=1)
+        self.expand_3x3_relu = nn.ReLU(inplace=True)
+    
+    def forward(self, x):
+        x = self.squeeze_relu(self.squeeze(x))
+        
+        return torch.cat([
+            self.expand_1x1_relu(self.expand_1x1(x)),
+            self.expand_3x3_relu(self.expand_3x3(x))
+        ], 1)
+```
+
+### DenseNet - Dense Block
+
+```python
+class DenseBlock(nn.Module):
+    def __init__(self, num_layers, in_channels, growth_rate):
+        super().__init__()
+        
+        layers = []
+        for i in range(num_layers):
+            layers.append(DenseLayer(in_channels + i * growth_rate, growth_rate))
+        
+        self.layers = nn.Sequential(*layers)
+    
+    def forward(self, x):
+        for layer in self.layers:
+            out = layer(x)
+            x = torch.cat([x, out], 1)
+        
+        return x
+
+class DenseLayer(nn.Module):
+    def __init__(self, in_channels, growth_rate):
+        super().__init__()
+        
+        self.bn = nn.BatchNorm2d(in_channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(in_channels, growth_rate, 3, padding=1, bias=False)
+    
+    def forward(self, x):
+        out = self.relu(self.bn(x))
+        return self.conv(out)
+```
+
+---
+
+## 🧪 테스트 및 벤치마킹
+
+### 통합 테스트 도구
+
+`model_test.py` 를 통해 모든 아키텍처를 비교, 벤치마킹할 수 있습니다.
 
 ```bash
-# 기본 사용 (EfficientNet)
+# 단일 모델 테스트
 python model_test.py --image test.jpg
 
-# 특정 모델 테스트
-python model_test.py --model efficientnet --image test.jpg
-python model_test.py --model densenet --image test.jpg --device cuda
-
-# 상위 k개 결과 표시
-python model_test.py --model mobilenetv3 --image test.jpg --top_k 10
-```
-
-#### ⚖️ 모델 비교
-
-```bash
 # 모든 모델 비교
 python model_test.py --image test.jpg --compare
 
-# 상위 3개 결과 표시
-python model_test.py --image test.jpg --compare --top_k 3
+# 벤치마킹 (10 회 반복 평균)
+python model_test.py --image test.jpg --benchmark
 ```
 
-**출력 예시:**
+### 출력 예시
+
 ```
-CNN ARCHITECTURE COMPARISON
-================================================================================
+ARCHITECTURE COMPARISON
+===================================
 Image: test.jpg
 
-Model          Input Size   Top 1           Time (ms)      
------------------------------------------------------------------
-alexnet        224          68.25%          12.34          
-densenet       224          75.12%          45.67          
-efficientnet   224          78.43%          23.89          
-mobilenetv3    224          72.56%          8.92           
-vgg19          224          65.89%          89.23          
-================================================================================
+Model          Top 1          Time (ms)    Params (M)
+--------------- ---------- ---------- ----------
+alexnet        72.50%        12.34       57.84
+densenet       75.12%        45.67        8.04
+efficientnet   78.43%        23.89        5.29
+mobilenetv3    72.56%         8.92        5.40
+vgg19          65.89%        89.23      134.31
 
 BEST PERFORMING MODELS
-================================================================================
+===================================
 1. efficientnet: 78.43% accuracy
 2. densenet: 75.12% accuracy
 3. mobilenetv3: 72.56% accuracy
-================================================================================
 ```
-
-#### ⚡ 벤치마킹
-
-```bash
-# 모든 모델 벤치마킹 (10 회 반복 평균)
-python model_test.py --image test.jpg --benchmark
-
-# 사용자 정의 반복 횟수
-python model_test.py --image test.jpg --benchmark --iterations 50
-```
-
-**출력 예시:**
-```
-ARCHITECTURE BENCHMARKING
-================================================================================
-Image: test.jpg
-
-Model          Params (M)    Avg Time (ms)   Throughput (fps)
------------------------------------------------------------------
-alexnet        57.84         12.34           81.04          
-densenet       8.04          45.67           21.90          
-efficientnet   5.29          23.89           41.86          
-mobilenetv3    5.40          8.92            112.11         
-vgg19          134.31        89.23           11.21          
-================================================================================
-```
-
-### 사용 가능한 모델
-
-```
-alexnet, vgg19, resnet50, inception, mobilenetv2,
-xception, resnext, repvgg, googlenet, efficientnet,
-squeezenet, densenet, nasnet, mobilenetv3
-```
-
-### 코드 사용 예시 (Python)
-
-```python
-from model_test import CNNTester
-
-# 초기화
-tester = CNNTester(device='cuda')
-
-# 단일 모델 분류
-model = tester.get_model('efficientnet')
-results = tester.classify(model, 'test.jpg', top_k=5)
-tester.print_results(results)
-
-# 모든 모델 비교
-results = tester.compare_architectures('test.jpg', top_k=3)
-
-# 벤치마킹
-tester.benchmark('test.jpg', iterations=20)
-```
-
-### 명령어 옵션
-
-| 옵션 | 단축 | 설명 | 기본값 |
-|------|------|------|--------|
-| `--model` | `-m` | 테스트할 모델 이름 | `efficientnet` |
-| `--image` | `-i` | 입력 이미지 경로 | *필수* |
-| `--top_k` | `-k` | 상위 k개 결과 표시 | `5` |
-| `--device` | `-d` | 사용 장치 (cpu/cuda) | `auto` |
-| `--compare` | `-c` | 모든 모델 비교 | `False` |
-| `--benchmark` | `-b` | 벤치마킹 실행 | `False` |
-| `--iterations` | `-n` | 벤치마킹 반복 횟수 | `10` |
-
-### 실행 스크립트
-
-```bash
-#!/bin/bash
-# compare_all.sh - 모든 모델 비교 스크립트
-
-IMAGE="${1:-test.jpg}"
-DEVICE="${2:-auto}"
-
-echo "Running CNN Architecture Comparison on $IMAGE..."
-python model_test.py --image "$IMAGE" --compare --device "$DEVICE"
-```
-
-## Usage Example
-
-```python
-import torch
-from EfficientNet import create_efficientnet_b0
-from SqueezeNet import create_squeezenet
-from DenseNet import densenet121
-from NASNet import create_nasnet_mobile
-from MobileNetV3 import create_mobilenetv3_large
-
-# Create model
-model = create_efficientnet_b0(num_classes=1000)
-
-# Test
-x = torch.randn(1, 3, 224, 224)
-output = model(x)
-print(f"Output: {output.shape}")
-```
-
-## References
-
-1. **AlexNet**: Krizhevsky et al. (2012) - ImageNet Classification with Deep CNN
-2. **VGG**: Simonyan & Zisserman (2015) - Very Deep CNNs for Large-Scale Recognition
-3. **ResNet**: He et al. (2015) - Deep Residual Learning for Image Recognition
-4. **GoogLeNet**: Szegedy et al. (2015) - Going Deeper with Convolutions
-5. **MobileNetV2**: Sandler et al. (2018) - MobileNetV2: Inverted Residuals and Linear Bottlenecks
-6. **Xception**: Chollet (2017) - Xception: Deep Learning with Depthwise Separable Convolutions
-7. **ResNeXt**: Xie et al. (2016) - Aggregated Residual Transformations for Deep Neural Networks
-8. **RepVGG**: Chen et al. (2021) - Rethinking the Scale in Structure-Pruning
-9. **EfficientNet**: Tan & Le (2019) - EfficientNet: Rethinking Model Scaling for CNNs
-10. **SqueezeNet**: Iandola et al. (2016) - SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
-11. **DenseNet**: Huang et al. (2017) - Densely Connected Convolutional Networks
-12. **NASNet**: Zoph et al. (2018) - Learning Transferable Architectures from Scratch
-13. **MobileNetV3**: Howard et al. (2019) - Searching for MobileNetV3
 
 ---
 
-_PyTorch 로 직접 구현하며 CNN 의 핵심 아이디어를 정복합니다!_ 🚀
+## 📚 학습 목표
+
+### 직접 구현하며 배우는 것
+
+1. **아키텍처 설계의 미묘한 차이 이해**
+   - ResNet 의 Skip Connection 의 역할
+   - Inception 의 Multi-scale 병렬 처리
+   - Depthwise Separable Conv 의 효율성
+
+2. **PyTorch 고급 기능 활용**
+   - `nn.Module` 조합 및 상속
+   - forward 메서드 설계
+   - Custom Layer 구현
+
+3. **실제 구현의 어려움**
+   - BatchNorm placement
+   - Activation function choice
+   - Initialization strategies
+
+4. **모델 비교 및 분석**
+   - 파라미터 효율성
+   - 추론 속도
+   - 정확도 트레이드오프
 
 ---
 
-## 📧 연락처 및 기여
+## 🎓 구현 순서 추천
+
+**Beginner → Advanced**
+
+1. **Step 1**: AlexNet (가장 기본)
+2. **Step 2**: VGG19 (심층 CNN 이해)
+3. **Step 3**: GoogLeNet (Inception module)
+4. **Step 4**: ResNet50 (Skip connection, Bottleneck)
+5. **Step 5**: MobileNetV2 (Depthwise, Inverted Residual)
+6. **Step 6**: EfficientNet (Compound Scaling, MBConv)
+7. **Step 7**: DenseNet (Dense connection)
+8. **Step 8**: NASNet (Neural Architecture Search 기반)
+9. **Step 9**: RepVGG (Reparameterization)
+10. **Step 10**: MobileNetV3 (SE, h-swish)
+
+---
+
+## 📁 레포지토리 구조
+
+```
+CNN-From-Scratch-With-PyTorch/
+├── AlexNet.py              # AlexNet 구현
+├── VGG.py                  # VGG19 구현
+├── GoogLeNet.py            # Inception v1 구현
+├── ResNet.py               # ResNet50 구현
+├── MobileNetV2.py          # MobileNetV2 구현
+├── Xception.py             # Xception 구현
+├── ResNeXt.py              # ResNeXt 구현
+├── RepVGG.py               # RepVGG 구현
+├── EfficientNet.py         # EfficientNet-B0 구현
+├── SqueezeNet.py           # SqueezeNet 1.0 구현
+├── DenseNet.py             # DenseNet-121 구현
+├── NASNet.py               # NASNet-A Mobile 구현
+├── MobileNetV3.py          # MobileNetV3 구현
+├── model_test.py           # 통합 테스트 및 벤치마킹
+├── README.md
+└── requirements.txt
+```
+
+---
+
+## 📖 참고 자료
+
+### 주요 논문
+
+1. **AlexNet** - Krizhevsky et al. (2012)
+2. **VGG** - Simonyan & Zisserman (2015)
+3. **GoogLeNet** - Szegedy et al. (2015)
+4. **ResNet** - He et al. (2015)
+5. **MobileNetV2** - Sandler et al. (2018)
+6. **Xception** - Chollet (2017)
+7. **ResNeXt** - Xie et al. (2016)
+8. **EfficientNet** - Tan & Le (2019)
+9. **SqueezeNet** - Iandola et al. (2016)
+10. **DenseNet** - Huang et al. (2017)
+11. **NASNet** - Zoph et al. (2018)
+12. **MobileNetV3** - Howard et al. (2019)
+13. **RepVGG** - Chen et al. (2021)
+
+---
+
+## 📧 연락처
 
 **작업자**: Jung-woojin  
 **이메일**: wojin010629@gmail.com
 
 **참여 활동**:
-- 14 개 CNN 아키텍처 직접 구현 (AlexNet → MobileNetV3)
-- 주요 아키텍처별 핵심 기술 상세 분석 및 구현
-- MBConv, SqueezeNet, DenseNet, Compound Scaling 구현
-- 통합 테스트 프레임워크 (model_test.py) 개발
-- 아키텍처 벤치마킹 및 비교 분석 도구 개발
-- 각 아키텍처의 파라미터 수, 추론 시간, 정확도 측정
-
-**저작**: 본 저장소의 모든 아키텍처 구현, 분석, 테스트 도구는 Jung-woojin 이 작성하였습니다.
+- 14 개 CNN 백본 네트워크 직접 구현 및 설계
+- 아키텍처별 핵심 구성 요소 (Bottleneck, Inception, MBConv 등) 구현
+- 통합 테스트 프레임워크 개발 및 벤치마킹
+- 각 아키텍처의 설계 의도 및 구현 세부사항 분석
 
 *Last modified: 2026-04-03*
