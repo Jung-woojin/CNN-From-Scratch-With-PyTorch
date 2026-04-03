@@ -266,21 +266,3 @@ print(f"Output: {output.shape}")
 
 _PyTorch 로 직접 구현하며 CNN 의 핵심 아이디어를 정복합니다!_ 🚀
 
----
-
-## 📧 연락처 및 기여
-
-**작업자**: Jung-woojin  
-**이메일**: wojin010629@gmail.com
-
-**참여 활동**:
-- 14 개 CNN 아키텍처 직접 구현 (AlexNet → MobileNetV3)
-- 주요 아키텍처별 핵심 기술 상세 분석 및 구현
-- MBConv, SqueezeNet, DenseNet, Compound Scaling 구현
-- 통합 테스트 프레임워크 (model_test.py) 개발
-- 아키텍처 벤치마킹 및 비교 분석 도구 개발
-- 각 아키텍처의 파라미터 수, 추론 시간, 정확도 측정
-
-**저작**: 본 저장소의 모든 아키텍처 구현, 분석, 테스트 도구는 Jung-woojin 이 작성하였습니다.
-
-*Last modified: 2026-04-03*
