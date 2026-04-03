@@ -1,5 +1,4 @@
 import torch
-import torchinfo
 
 class convblcok(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, activation=True):
